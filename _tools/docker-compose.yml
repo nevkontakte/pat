@@ -1,0 +1,27 @@
+version: "3.3"
+services:
+  postgres:
+    image: "docker.io/timescale/timescaledb:latest-pg14"
+    container_name: "pat_postgres"
+    # echo "UID_GID=$(id -u):$(id -g)" > .env
+    user: "${UID_GID:-1000:1001}"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - PGDATA=/storage/data
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./storage:/storage
+      - /etc/passwd:/etc/passwd:ro # To make host UID/GID resolve.
+  pgweb:
+    container_name: pat_pgweb
+    restart: always
+    image: sosedoff/pgweb
+    ports:
+      - "8081:8081"
+    links:
+      - postgres:postgres
+    environment:
+      - PGWEB_DATABASE_URL=postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable
+    depends_on:
+      - postgres
