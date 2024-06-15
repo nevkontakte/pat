@@ -17,10 +17,10 @@ type Web struct {
 func (w *Web) Bind(e *echo.Echo) {
 	e.GET("/", w.index)
 
-	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
+	e.Group("/static", middleware.StaticWithConfig(middleware.StaticConfig{
 		Root:       "",
-		Browse:     false,
 		Filesystem: http.FS(w.StaticFS),
+		// Browse:     true,
 	}))
 }
 

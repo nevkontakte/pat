@@ -1,13 +1,13 @@
 package main
 
 import (
-	"embed"
 	"flag"
 	"fmt"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/nevkontakte/pat/static"
 	"github.com/nevkontakte/pat/web"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -17,9 +17,6 @@ var (
 	bind = flag.String("bind", ":8080", "Address to start the HTTP server at.")
 	db   = flag.String("db", "host=localhost user=postgres password=postgres dbname=pat port=5432 sslmode=disable", "Database connection string.")
 )
-
-//go:embed static
-var staticFS embed.FS
 
 func run(e *echo.Echo) error {
 	// Logging
@@ -40,10 +37,9 @@ func run(e *echo.Echo) error {
 
 	// Set up HTTP server.
 	w := web.Web{
-		StaticFS: staticFS,
+		StaticFS: static.StaticFS,
 	}
 	w.Bind(e)
-	e.Logger.Info(staticFS.ReadDir("static"))
 
 	// Start server
 	return e.Start(*bind)
