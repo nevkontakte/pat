@@ -17,6 +17,8 @@ var (
 )
 
 func main() {
+	flag.Parse()
+
 	// Echo instance
 	e := echo.New()
 	e.Logger.SetLevel(log.INFO)
