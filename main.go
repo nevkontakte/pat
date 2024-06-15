@@ -2,11 +2,12 @@ package main
 
 import (
 	"flag"
-	"net/http"
+	"fmt"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/nevkontakte/pat/web"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -16,33 +17,37 @@ var (
 	db   = flag.String("db", "host=localhost user=postgres password=postgres dbname=pat port=5432 sslmode=disable", "Database connection string.")
 )
 
-func main() {
-	flag.Parse()
-
-	// Echo instance
-	e := echo.New()
+func run(e *echo.Echo) error {
+	// Logging
 	e.Logger.SetLevel(log.INFO)
 
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	// Routes
-	e.GET("/", hello)
-
 	db, err := gorm.Open(postgres.Open(*db), &gorm.Config{})
 	if err != nil {
-		e.Logger.Fatalf("Failed to connect to the database at %q: %v", err)
+		return fmt.Errorf("failed to connect to the database: %w", err)
 	}
+
 	var version string
 	db.Raw("SELECT version();").Scan(&version)
 	e.Logger.Infof("Connected to %s.", version)
 
+	// Set up HTTP server.
+	w := web.Web{}
+	w.Bind(e)
+
 	// Start server
-	e.Logger.Fatal(e.Start(*bind))
+	return e.Start(*bind)
 }
 
-// Handler
-func hello(c echo.Context) error {
-	return c.String(http.StatusOK, "🐈")
+func main() {
+	flag.Parse()
+
+	e := echo.New()
+
+	if err := run(e); err != nil {
+		e.Logger.Fatal(err)
+	}
 }
