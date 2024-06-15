@@ -24,6 +24,7 @@ func (w *Web) Bind(e *echo.Echo) {
 	}))
 }
 
+// index page handler.
 func (w *Web) index(c echo.Context) error {
-	return c.String(http.StatusOK, "🐈")
+	return c.Render(http.StatusOK, "index.html", nil)
 }

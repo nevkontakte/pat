@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
 	"github.com/nevkontakte/pat/static"
+	"github.com/nevkontakte/pat/tmpl"
 	"github.com/nevkontakte/pat/web"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -34,6 +35,11 @@ func run(e *echo.Echo) error {
 	var version string
 	db.Raw("SELECT version();").Scan(&version)
 	e.Logger.Infof("Connected to %s.", version)
+
+	e.Renderer, err = tmpl.Load()
+	if err != nil {
+		return fmt.Errorf("failed to load templates: %w", err)
+	}
 
 	// Set up HTTP server.
 	w := web.Web{

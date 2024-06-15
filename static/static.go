@@ -4,5 +4,5 @@ import "embed"
 
 // StaticFS is an embedded file system with static assets.
 //
-//go:embed cat
+//go:embed cat css
 var StaticFS embed.FS
