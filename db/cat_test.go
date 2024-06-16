@@ -18,7 +18,7 @@ func TestCatByID(t *testing.T) {
 	dbtest.Save(t, tx, &c1, &c2)
 
 	for _, want := range []Cat{c1, c2} {
-		t.Run(want.ID, func(t *testing.T) {
+		t.Run(string(want.ID), func(t *testing.T) {
 			got, err := CatByID(tx, want.ID)
 			if err != nil {
 				t.Errorf("Got: CatByID(%q) returned error: %s. Want: no error.", want.ID, err)
