@@ -1,16 +1,20 @@
 package web
 
 import (
+	"fmt"
 	"io/fs"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/nevkontakte/pat/db"
+	"gorm.io/gorm"
 )
 
 // Web implements the HTTP server for the pat junkie.
 type Web struct {
 	StaticFS fs.FS
+	DB       *gorm.DB
 }
 
 // Bind HTTP handlers to the Echo server.
@@ -26,5 +30,14 @@ func (w *Web) Bind(e *echo.Echo) {
 
 // index page handler.
 func (w *Web) index(c echo.Context) error {
-	return c.Render(http.StatusOK, "index.html", nil)
+	splotch, err := db.CatByID(w.DB, db.SplotchID)
+	if err != nil { // Should never happen.
+		return fmt.Errorf("oops, Splotch went missing 🙀: %w", err)
+	}
+	data := struct {
+		Cat db.Cat
+	}{
+		Cat: splotch,
+	}
+	return c.Render(http.StatusOK, "index.html", data)
 }
