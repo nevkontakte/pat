@@ -16,7 +16,7 @@
   <header></header>
   <main class="cat">
     <a href="/pat/" title="Give {{ .Cat.Name }} a pat?" role="button" aria-label="Give {{ .Cat.Name }} a pat?">
-      <img src="/static/cat/idle.png" alt="Splotch the Cat noticed your arrival." width="1024" height="1024">
+      <img src="/static/cat/{{ .Cat.Mood }}.png" alt="Splotch the Cat noticed your arrival." width="1024" height="1024">
     </a>
     <div class="status">Pats received: {{ .Cat.Pats }}</div>
   </main>
