@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -28,4 +29,19 @@ func CatByID(tx *gorm.DB, id CatID) (Cat, error) {
 		return Cat{}, result.Error
 	}
 	return c, nil
+}
+
+// Pat records a new pat for the given Cat.
+func Pat(tx *gorm.DB, id CatID) error {
+	result := tx.Model(Cat{ID: id}).Updates(map[string]any{
+		"pats":       gorm.Expr("pats + 1"),
+		"latest_pat": time.Now(),
+	})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected != 1 {
+		return fmt.Errorf("updated %d rows: %w", result.RowsAffected, gorm.ErrRecordNotFound)
+	}
+	return nil
 }

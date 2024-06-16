@@ -20,6 +20,7 @@ type Web struct {
 // Bind HTTP handlers to the Echo server.
 func (w *Web) Bind(e *echo.Echo) {
 	e.GET("/", w.index)
+	e.GET("/pat/", w.pat)
 
 	e.Group("/static", middleware.StaticWithConfig(middleware.StaticConfig{
 		Root:       "",
@@ -40,4 +41,12 @@ func (w *Web) index(c echo.Context) error {
 		Cat: splotch,
 	}
 	return c.Render(http.StatusOK, "index.html", data)
+}
+
+// pat action handler.
+func (w *Web) pat(c echo.Context) error {
+	if err := db.Pat(w.DB, db.SplotchID); err != nil {
+		return fmt.Errorf("failed to pat Splotch: %w", err)
+	}
+	return c.Redirect(http.StatusFound, "/")
 }

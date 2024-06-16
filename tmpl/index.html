@@ -15,7 +15,9 @@
 <body>
   <header></header>
   <main class="cat">
-    <img src="/static/cat/idle.png" alt="Splotch the Cat noticed your arrival." width="1024" height="1024">
+    <a href="/pat/" title="Give {{ .Cat.Name }} a pat?" role="button" aria-label="Give {{ .Cat.Name }} a pat?">
+      <img src="/static/cat/idle.png" alt="Splotch the Cat noticed your arrival." width="1024" height="1024">
+    </a>
     <div class="status">Pats received: {{ .Cat.Pats }}</div>
   </main>
   <footer>Art by an anonymous admirer, coding by <a href="http://nevkontakte.com/">nevkontakte</a>.</footer>
