@@ -4,12 +4,24 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/nevkontakte/pat/behavior"
 	"github.com/nevkontakte/pat/chrono"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"gorm.io/gorm"
 )
 
 // CatID is the type for Cat record's primary key and unique identifier.
 type CatID string
+
+// Seed returns the noise seed for the cat, given noise type.
+func (id CatID) Seed(cue string) []byte {
+	return []byte(cue + string(id))
+}
+
+func (id CatID) Name() string {
+	return cases.Title(language.AmericanEnglish).String(string(id))
+}
 
 // SplotchID is the identifier of the OG, Splotch `Pat Junkie` the Cat.
 const SplotchID CatID = "splotch"
@@ -36,7 +48,8 @@ type Cat struct {
 
 // Mood corresponding to Cat's current state.
 func (c Cat) Mood() Mood {
-	sincePat := chrono.Now().Sub(c.LatestPat)
+	now := chrono.Now()
+	sincePat := now.Sub(c.LatestPat)
 
 	// Someone is petting the cat right now!
 	if sincePat < 5*time.Second {
@@ -48,6 +61,12 @@ func (c Cat) Mood() Mood {
 		return MoodIdleHappy
 	}
 
+	// In the next three hours, the cat may remember getting petted and get happy again.
+	moodSwing := behavior.Spread(-3*time.Hour, 3*time.Hour, c.noise(c.ID.Seed("happy"), 5*time.Minute).At(now))
+	if sincePat+moodSwing < 30*time.Minute {
+		return MoodIdleHappy
+	}
+
 	// Cat's just chillin'.
 	if sincePat < 7*24*time.Hour {
 		return MoodIdle
@@ -55,6 +74,13 @@ func (c Cat) Mood() Mood {
 
 	// It's been far too long since anyone played with the cat, she's bored.
 	return MoodImpatient
+}
+
+func (c Cat) noise(seed []byte, period time.Duration) behavior.TemporalNoise {
+	return behavior.SmoothNoise{
+		Underlying: behavior.Md5Noise{Seed: seed},
+		Period:     period,
+	}
 }
 
 // CatByID queries the cat with the given ID from the database.

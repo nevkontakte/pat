@@ -5,6 +5,8 @@ import (
 	"encoding/binary"
 	"math"
 	"time"
+
+	"golang.org/x/exp/constraints"
 )
 
 // TemporalNoise provides pseudo-random, time-dependent noise.
@@ -78,4 +80,9 @@ func smootherStep(before, after, now time.Time) float64 {
 	x := float64(now.UnixNano())
 	x = clamp01((x - edge0) / (edge1 - edge0))
 	return x * x * x * (x*(6*x-15) + 10)
+}
+
+// Spread converts simple [0,1] float64 noise into a range of numeric values.
+func Spread[T constraints.Integer | constraints.Float](min, max T, noise float64) T {
+	return min + T(float64(max-min)*noise)
 }

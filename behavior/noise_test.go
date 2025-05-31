@@ -4,6 +4,8 @@ import (
 	"math"
 	"testing"
 	"time"
+
+	"golang.org/x/exp/constraints"
 )
 
 // checkDeterminism verifies that repeated calls to noise.At with the same
@@ -203,4 +205,67 @@ func TestSmoothNoiseConsecutiveDifference(t *testing.T) {
 	if avgDiff >= expectedMaxAvgDiff {
 		t.Errorf("SmoothNoise average consecutive difference was %f, expected < %f (period: %v)", avgDiff, expectedMaxAvgDiff, smoothNoise.Period)
 	}
+}
+
+// testSpread is a generic helper for testing the Spread function.
+func testSpread[T constraints.Integer | constraints.Float](t *testing.T, name string, min, max T, noise float64, want T) {
+	t.Helper()
+	got := Spread(min, max, noise)
+
+	// Special handling for float comparison due to potential precision issues.
+	if fWant, ok := any(want).(float64); ok {
+		if fGot, okGot := any(got).(float64); okGot {
+			// Using a small epsilon for float comparison.
+			if math.Abs(fGot-fWant) > 1e-9 {
+				t.Errorf("%s: Spread(%v, %v, %f) = %v; want %v", name, min, max, noise, got, want)
+			}
+			return // Comparison done for float64.
+		}
+	}
+
+	// Direct comparison for integer types (including time.Duration).
+	if got != want {
+		t.Errorf("%s: Spread(%v, %v, %f) = %v; want %v", name, min, max, noise, got, want)
+	}
+}
+
+func TestSpread(t *testing.T) {
+	// Integer tests
+	testSpread(t, "int_zero_noise", 0, 100, 0.0, 0)
+	testSpread(t, "int_one_noise", 0, 100, 1.0, 100)
+	testSpread(t, "int_half_noise_exact", 0, 100, 0.5, 50)
+	testSpread(t, "int_half_noise_truncation", 0, 10, 0.57, 5)       // int(10 * 0.57) = int(5.7) = 5
+	testSpread(t, "int_almost_one_noise_truncation", 0, 10, 0.99, 9) // int(10 * 0.99) = int(9.9) = 9
+	testSpread(t, "int_negative_min", -10, 10, 0.5, 0)               // -10 + int(20 * 0.5) = -10 + 10 = 0
+	testSpread(t, "int_negative_min_zero_noise", -10, 10, 0.0, -10)
+	testSpread(t, "int_negative_min_one_noise", -10, 10, 1.0, 10)
+	testSpread(t, "int_min_equals_max", 50, 50, 0.75, 50)
+	testSpread(t, "int_min_greater_than_max", 100, 0, 0.5, 50) // 100 + int(-100 * 0.5) = 100 - 50 = 50
+
+	// Float64 tests
+	testSpread(t, "float64_zero_noise", 0.0, 10.0, 0.0, 0.0)
+	testSpread(t, "float64_one_noise", 0.0, 10.0, 1.0, 10.0)
+	testSpread(t, "float64_quarter_noise", 0.0, 10.0, 0.25, 2.5)
+	testSpread(t, "float64_negative_min", -5.0, 5.0, 0.5, 0.0) // -5.0 + (10.0 * 0.5) = 0.0
+	testSpread(t, "float64_min_equals_max", 7.7, 7.7, 0.3, 7.7)
+	testSpread(t, "float64_min_greater_than_max", 10.0, 0.0, 0.5, 5.0) // 10.0 + (-10.0 * 0.5) = 5.0
+
+	// time.Duration tests (time.Duration is an alias for int64)
+	testSpread(t, "duration_zero_noise", time.Duration(0), time.Second, 0.0, time.Duration(0))
+	testSpread(t, "duration_one_noise", time.Duration(0), time.Second, 1.0, time.Second)
+
+	// Expected: 0 + time.Duration(int64(float64(time.Second) * 0.5))
+	// float64(1_000_000_000) * 0.5 = 500_000_000.0
+	// time.Duration(500_000_000) = 500 * time.Millisecond
+	testSpread(t, "duration_half_noise", time.Duration(0), time.Second, 0.5, 500*time.Millisecond)
+	testSpread(t, "duration_min_equals_max", time.Minute, time.Minute, 0.2, time.Minute)
+
+	// Expected: time.Hour + time.Duration(int64(float64(time.Minute-time.Hour) * 0.5))
+	// time.Minute-time.Hour = -59 * time.Minute
+	// float64(-59 * time.Minute) * 0.5 = -1770 * 1e9
+	// time.Hour - 1770*time.Second = 3600*time.Second - 1770*time.Second = 1830*time.Second
+	expectedMinGreaterDuration := time.Hour + time.Duration(int64(float64(time.Minute-time.Hour)*0.5)) // Should be 30*time.Minute + 30*time.Second
+	testSpread(t, "duration_min_greater_than_max", time.Hour, time.Minute, 0.5, expectedMinGreaterDuration)
+
+	testSpread(t, "duration_truncation", time.Duration(0), time.Duration(100 /*nanoseconds*/), 0.557, time.Duration(55 /*nanoseconds*/))
 }

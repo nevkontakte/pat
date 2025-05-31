@@ -25,7 +25,7 @@ func Bootstrap(db *gorm.DB) error {
 
 	if result := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&Cat{
 		ID:        SplotchID,
-		Name:      "Splotch",
+		Name:      SplotchID.Name(),
 		Pats:      1,
 		LatestPat: time.Now(),
 	}); result.Error != nil {
