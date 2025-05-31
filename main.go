@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"runtime/debug"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -45,6 +46,15 @@ func run(e *echo.Echo) error {
 		DB:       dbconn,
 	}
 	w.Bind(e)
+
+	e.GET("/_/version", func(c echo.Context) error {
+		info, ok := debug.ReadBuildInfo()
+		if !ok {
+			return nil
+		}
+
+		return c.JSON(200, info.Main)
+	})
 
 	// Start server
 	return e.Start(*bind)
