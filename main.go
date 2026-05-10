@@ -26,6 +26,7 @@ func run(e *echo.Echo) error {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(web.VisitorMiddleware)
 
 	dbconn, err := db.Postgres(*dsn)
 	if err != nil {

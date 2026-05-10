@@ -35,6 +35,9 @@ func (w *Web) index(c echo.Context) error {
 	if err != nil { // Should never happen.
 		return fmt.Errorf("oops, Splotch went missing 🙀: %w", err)
 	}
+	if err := w.recordJournal(c, db.Event{Type: db.EventVisit}); err != nil {
+		return err
+	}
 	data := struct {
 		Cat db.Cat
 	}{
@@ -48,5 +51,21 @@ func (w *Web) pat(c echo.Context) error {
 	if err := db.Pat(w.DB, db.SplotchID); err != nil {
 		return fmt.Errorf("failed to pat Splotch: %w", err)
 	}
+
+	if err := w.recordJournal(c, db.Event{Type: db.EventPat}); err != nil {
+		return err
+	}
 	return c.Redirect(http.StatusFound, "/")
+}
+
+func (w *Web) recordJournal(c echo.Context, e db.Event) error {
+	result := w.DB.Save(&db.Journal{
+		Visitor: VisitorFromContext(c),
+		CatID:   db.SplotchID,
+		Event:   e,
+	})
+	if result.Error != nil {
+		return fmt.Errorf("failed to add a journal entry: %s", result.Error)
+	}
+	return nil
 }

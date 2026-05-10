@@ -19,7 +19,7 @@ func Postgres(dsn string) (*gorm.DB, error) {
 // Apply migrations and seed with initial data if missing. The operation is
 // idempotent and should do nothing on an already set up database.
 func Bootstrap(db *gorm.DB) error {
-	if err := db.AutoMigrate(&Cat{}); err != nil {
+	if err := db.AutoMigrate(&Cat{}, &Journal{}); err != nil {
 		return fmt.Errorf("failed to auto-migrate data types: %w", err)
 	}
 
