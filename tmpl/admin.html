@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Admin · Splotch</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/admin.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon/favicon-16x16.png" />
+  </head>
+  <body class="admin-body">
+    <main class="admin-cards">
+      <section class="card">
+        <h1>Splotch</h1>
+        <dl>
+          <dt>Mood</dt>
+          <dd>{{ .Mood }}</dd>
+          <dt>Last visit</dt>
+          <dd>{{ since .LastVisit }}</dd>
+          <dt>Last pat</dt>
+          <dd>{{ since .LastPat }}</dd>
+        </dl>
+      </section>
+
+      <nav class="card">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li class="muted">Journal</li>
+          <li><a href="/admin/logout">Log out</a></li>
+        </ul>
+      </nav>
+    </main>
+  </body>
+</html>

@@ -15,8 +15,10 @@ import (
 )
 
 var (
-	bind = flag.String("bind", ":8080", "Address to start the HTTP server at.")
-	dsn  = flag.String("db", "host=localhost user=postgres password=postgres dbname=pat port=5432 sslmode=disable", "Database connection string.")
+	bind          = flag.String("bind", ":8080", "Address to start the HTTP server at.")
+	dsn           = flag.String("db", "host=localhost user=postgres password=postgres dbname=pat port=5432 sslmode=disable", "Database connection string.")
+	adminPassword = flag.String("admin-password", "", "Bcrypt hash of the admin password. Admin pages are disabled if unset.")
+	secret        = flag.String("secret", "", "Server-side signing secret for session cookies. Admin pages are disabled if unset.")
 )
 
 func run(e *echo.Echo) error {
@@ -43,8 +45,10 @@ func run(e *echo.Echo) error {
 
 	// Set up HTTP server.
 	w := web.Web{
-		StaticFS: static.StaticFS,
-		DB:       dbconn,
+		StaticFS:          static.StaticFS,
+		DB:                dbconn,
+		AdminPasswordHash: []byte(*adminPassword),
+		Secret:            []byte(*secret),
 	}
 	w.Bind(e)
 

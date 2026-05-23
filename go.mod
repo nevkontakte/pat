@@ -7,6 +7,7 @@ require (
 	github.com/google/safehtml v0.1.1-0.20240425152301-b6f7665b1ff3
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/labstack/gommon v0.4.2
+	golang.org/x/crypto v0.45.0
 	golang.org/x/exp v0.0.0-20250531010427-b6e5de432a8b
 	golang.org/x/text v0.31.0
 	gorm.io/driver/postgres v1.5.9
@@ -15,6 +16,7 @@ require (
 )
 
 require (
+	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
@@ -27,7 +29,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/sync v0.18.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect

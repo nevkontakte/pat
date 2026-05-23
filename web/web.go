@@ -13,8 +13,10 @@ import (
 
 // Web implements the HTTP server for the pat junkie.
 type Web struct {
-	StaticFS fs.FS
-	DB       *gorm.DB
+	StaticFS          fs.FS
+	DB                *gorm.DB
+	AdminPasswordHash []byte // Bcrypt hash of the admin password. Admin routes are disabled if empty.
+	Secret            []byte // Server-side signing secret for session cookies. Admin routes are disabled if empty.
 }
 
 // Bind HTTP handlers to the Echo server.
@@ -27,6 +29,15 @@ func (w *Web) Bind(e *echo.Echo) {
 		Filesystem: http.FS(w.StaticFS),
 		// Browse:     true,
 	}))
+
+	if len(w.AdminPasswordHash) > 0 && len(w.Secret) > 0 {
+		e.GET("/admin/login", w.adminLogin)
+		e.POST("/admin/login", w.adminLoginPost)
+
+		admin := e.Group("/admin", w.requireAdmin)
+		admin.GET("/", w.adminDashboard)
+		admin.GET("/logout", w.adminLogout)
+	}
 }
 
 // index page handler.

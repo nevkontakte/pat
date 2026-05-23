@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Admin Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="/static/css/admin.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon/favicon-16x16.png" />
+  </head>
+  <body class="admin-body">
+    <main class="admin-cards">
+      <section>
+        <form method="POST" action="/admin/login">
+          <label for="password" class="sr-only">Password</label>
+          <input
+            id="password"
+            type="password"
+            name="password"
+            autocomplete="current-password"
+            placeholder="Password"
+          />
+          <button type="submit">Log in</button>
+          {{ if .Error }}
+          <p role="alert" class="login-error">{{ .Error }}</p>
+          {{ end }}
+        </form>
+      </section>
+    </main>
+  </body>
+</html>
