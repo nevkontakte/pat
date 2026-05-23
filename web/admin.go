@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/nevkontakte/pat/db"
 	"github.com/nevkontakte/pat/web/cookie"
 	"golang.org/x/crypto/bcrypt"
@@ -20,7 +20,7 @@ type AdminCookie struct {
 // requireAdmin is an Echo middleware that enforces admin authentication.
 // Requests without a valid session cookie are redirected to the login page.
 func (w *Web) requireAdmin(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		raw, err := c.Cookie(adminCookieName)
 		if err != nil {
 			return c.Redirect(http.StatusFound, "/admin/login")
@@ -35,11 +35,11 @@ func (w *Web) requireAdmin(next echo.HandlerFunc) echo.HandlerFunc {
 
 type loginData struct{ Error error }
 
-func (w *Web) adminLogin(c echo.Context) error {
+func (w *Web) adminLogin(c *echo.Context) error {
 	return c.Render(http.StatusOK, "login.html", &loginData{})
 }
 
-func (w *Web) adminLoginPost(c echo.Context) error {
+func (w *Web) adminLoginPost(c *echo.Context) error {
 	password := c.FormValue("password")
 	if err := bcrypt.CompareHashAndPassword(w.AdminPasswordHash, []byte(password)); err != nil {
 		return c.Render(http.StatusOK, "login.html", &loginData{
@@ -62,7 +62,7 @@ func (w *Web) adminLoginPost(c echo.Context) error {
 	return c.Redirect(http.StatusFound, "/admin/")
 }
 
-func (w *Web) adminLogout(c echo.Context) error {
+func (w *Web) adminLogout(c *echo.Context) error {
 	c.SetCookie(&http.Cookie{
 		Name:   adminCookieName,
 		Value:  "",
@@ -72,7 +72,7 @@ func (w *Web) adminLogout(c echo.Context) error {
 	return c.Redirect(http.StatusFound, "/")
 }
 
-func (w *Web) adminDashboard(c echo.Context) error {
+func (w *Web) adminDashboard(c *echo.Context) error {
 	splotch, err := db.CatByID(w.DB, db.SplotchID)
 	if err != nil {
 		return fmt.Errorf("failed to load cat: %w", err)

@@ -3,11 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log/slog"
+	"os"
 	"runtime/debug"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/labstack/gommon/log"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/nevkontakte/pat/db"
 	"github.com/nevkontakte/pat/static"
 	"github.com/nevkontakte/pat/tmpl"
@@ -22,11 +23,8 @@ var (
 )
 
 func run(e *echo.Echo) error {
-	// Logging
-	e.Logger.SetLevel(log.INFO)
-
 	// Middleware
-	e.Use(middleware.Logger())
+	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
 	e.Use(web.VisitorMiddleware)
 
@@ -52,7 +50,7 @@ func run(e *echo.Echo) error {
 	}
 	w.Bind(e)
 
-	e.GET("/_/version", func(c echo.Context) error {
+	e.GET("/_/version", func(c *echo.Context) error {
 		info, ok := debug.ReadBuildInfo()
 		if !ok {
 			return nil
@@ -71,6 +69,7 @@ func main() {
 	e := echo.New()
 
 	if err := run(e); err != nil {
-		e.Logger.Fatal(err)
+		slog.Error("server error", "err", err)
+		os.Exit(1)
 	}
 }

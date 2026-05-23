@@ -4,7 +4,7 @@ import (
 	"net/netip"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // Visitor represents information about a visitor.
@@ -24,7 +24,7 @@ type Visitor struct {
 //
 // Visitor identification is best-effort, if some aspects can't be identified,
 // we just leave them empty.
-func CurrentVisitor(c echo.Context) Visitor {
+func CurrentVisitor(c *echo.Context) Visitor {
 	v := Visitor{
 		Agent:    c.Request().UserAgent(),
 		Referrer: c.Request().Referer(),

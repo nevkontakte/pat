@@ -8,7 +8,7 @@ import (
 
 	"github.com/dustin/go-humanize"
 	"github.com/google/safehtml/template"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 //go:embed *.html
@@ -20,7 +20,7 @@ type Template struct {
 }
 
 // Render requested template with the provided context.
-func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+func (t *Template) Render(c *echo.Context, w io.Writer, name string, data any) error {
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 

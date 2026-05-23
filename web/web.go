@@ -5,8 +5,8 @@ import (
 	"io/fs"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	"github.com/nevkontakte/pat/db"
 	"gorm.io/gorm"
 )
@@ -26,7 +26,7 @@ func (w *Web) Bind(e *echo.Echo) {
 
 	e.Group("/static", middleware.StaticWithConfig(middleware.StaticConfig{
 		Root:       "",
-		Filesystem: http.FS(w.StaticFS),
+		Filesystem: w.StaticFS,
 		// Browse:     true,
 	}))
 
@@ -41,7 +41,7 @@ func (w *Web) Bind(e *echo.Echo) {
 }
 
 // index page handler.
-func (w *Web) index(c echo.Context) error {
+func (w *Web) index(c *echo.Context) error {
 	splotch, err := db.CatByID(w.DB, db.SplotchID)
 	if err != nil { // Should never happen.
 		return fmt.Errorf("oops, Splotch went missing 🙀: %w", err)
@@ -58,7 +58,7 @@ func (w *Web) index(c echo.Context) error {
 }
 
 // pat action handler.
-func (w *Web) pat(c echo.Context) error {
+func (w *Web) pat(c *echo.Context) error {
 	if err := db.Pat(w.DB, db.SplotchID); err != nil {
 		return fmt.Errorf("failed to pat Splotch: %w", err)
 	}
@@ -69,7 +69,7 @@ func (w *Web) pat(c echo.Context) error {
 	return c.Redirect(http.StatusFound, "/")
 }
 
-func (w *Web) recordJournal(c echo.Context, e db.Event) error {
+func (w *Web) recordJournal(c *echo.Context, e db.Event) error {
 	result := w.DB.Save(&db.Journal{
 		Visitor: VisitorFromContext(c),
 		CatID:   db.SplotchID,

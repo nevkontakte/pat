@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/nevkontakte/pat/db"
 	"github.com/nevkontakte/pat/db/dbtest"
 	"github.com/nevkontakte/pat/tmpl"
@@ -100,7 +100,7 @@ func TestRequireAdmin(t *testing.T) {
 			c := e.NewContext(req, rec)
 
 			called := false
-			err := w.requireAdmin(func(c echo.Context) error {
+			err := w.requireAdmin(func(c *echo.Context) error {
 				called = true
 				return c.String(http.StatusOK, "ok")
 			})(c)
