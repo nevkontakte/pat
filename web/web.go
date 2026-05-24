@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v5"
-	"github.com/labstack/echo/v5/middleware"
 	"github.com/nevkontakte/pat/db"
 	"gorm.io/gorm"
 )
@@ -24,11 +23,7 @@ func (w *Web) Bind(e *echo.Echo) {
 	e.GET("/", w.index)
 	e.GET("/pat/", w.pat)
 
-	e.Group("/static", middleware.StaticWithConfig(middleware.StaticConfig{
-		Root:       "",
-		Filesystem: w.StaticFS,
-		// Browse:     true,
-	}))
+	e.StaticFS("/static", w.StaticFS)
 
 	if len(w.AdminPasswordHash) > 0 && len(w.Secret) > 0 {
 		e.GET("/admin/login", w.adminLogin)
